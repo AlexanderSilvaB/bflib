@@ -1,6 +1,4 @@
-include_directories(..)
-
-option(BUILD_SAMPLES "Build the library samples" ON)
+include_directories(${CMAKE_SOURCE_DIR})
 
 if(BUILD_SAMPLES)
     find_package(PythonLibs 2.7)

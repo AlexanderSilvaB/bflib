@@ -10,8 +10,10 @@ using namespace std;
 namespace plt = matplotlibcpp;
 #endif
 
+typedef KF<float, 2, 1, 1> Aircraft;
+
 // The process model
-void process(Matrix2f &A, Vector2f &B, Matrix<float, 1, 2> &C, double dt)
+void process(Aircraft::StateMatrix &A, Aircraft::InputMatrix &B, Aircraft::OutputMatrix &C, double dt)
 {
     // Fills the A, B and C matrixes of the process
     A << 1, dt,
@@ -31,12 +33,13 @@ int main(int argc, char *argv[])
     float sigma_y_s = 5.0; // std for position sensor
 
     // Creates a linear kalman filter with float data type, 2 states, 1 input and 1 output
-    KF<float, 2, 1, 1> kf;
+    Aircraft kf;
+
     // Sets the process
     kf.setProcess(process);
 
     // Creates a new process covariance matrix Q
-    auto Q = kf.createQ();
+    Aircraft::ModelCovariance Q;
     // Fills the Q matrix
     Q << sigma_x_s*sigma_x_s, sigma_x_s*sigma_x_v,
          sigma_x_v*sigma_x_s, sigma_x_v*sigma_x_v;  
@@ -44,22 +47,21 @@ int main(int argc, char *argv[])
     kf.setQ(Q);
 
     // Creates a new sensor covariance matrix R
-    auto R = kf.createR();
+    Aircraft::SensorCovariance R;
     // Fills the R matrix
     R << sigma_y_s*sigma_y_s;
     // Sets the new R to the KF
     kf.setR(R);
 
     // Creates two states vectors, one for the simulation and one for the kalman output
-    auto x = kf.state();
-    auto xK = kf.state();
+    Aircraft::State x, xK;
 
     // Creates an input vector and fills it
-    auto u = kf.input();
+    Aircraft::Input u;
     u << 0.1;
 
     // Creates an output vector
-    auto y = kf.output();
+    Aircraft::Output y;
 
     // Creates auxialiary vector just for plotting purposes
     vector<float> X, XK, Y, TS, V, VK;

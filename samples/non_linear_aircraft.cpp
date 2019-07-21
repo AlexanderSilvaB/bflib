@@ -11,31 +11,33 @@ using namespace std;
 namespace plt = matplotlibcpp;
 #endif
 
-void model(Matrix<float, 2, 1> &x, Matrix<float, 1, 1> &u, double dt)
+typedef EKF<float, 2, 1, 1> Aircraft;
+
+void model(Aircraft::State &x, Aircraft::Input &u, double dt)
 {
-    Matrix<float, 2, 2> A;
+    Aircraft::StateMatrix A;
     A << 1, dt,
          0, 1;
     
-    Matrix<float, 2, 1> B;
+    Aircraft::InputMatrix B;
     B << (dt*dt)/2.0,
          dt;  
 
     x = A * x + B * u;
 }
 
-void sensor(Matrix<float, 1, 1> &y, Matrix<float, 2, 1> &x, Matrix<float, -1, 1> &d, double dt)
+void sensor(Aircraft::Output &y, Aircraft::State &x, Aircraft::Data &d, double dt)
 {
     y << x(0);
 }
 
-void modelJ(Matrix<float, 2, 2> &F, Matrix<float, 2, 1> &x, Matrix<float, 1, 1> &u, double dt)
+void modelJ(Aircraft::ModelJacobian &F, Aircraft::State &x, Aircraft::Input &u, double dt)
 {
     F << 1, dt,
          0, 1;
 }
 
-void sensorJ(Matrix<float, 1, 2> &H, Matrix<float, 2, 1> &x, Matrix<float, -1, 1> &d, double dt)
+void sensorJ(Aircraft::SensorJacobian &H, Aircraft::State &x, Aircraft::Data &d, double dt)
 {
     H << 1, 0;
 }
@@ -49,14 +51,14 @@ int main(int argc, char *argv[])
 
 
     // Creates a non-linear kalman filter with float data type, 2 states, 1 input and 1 output
-    EKF<float, 2, 1, 1> ekf;
+    Aircraft ekf;
     ekf.setModel(model);
     ekf.setSensor(sensor);
     ekf.setModelJacobian(modelJ);
     ekf.setSensorJacobian(sensorJ);
 
     // Creates a new process covariance matrix Q
-    auto Q = ekf.createQ();
+    Aircraft::ModelCovariance Q;
     // Fills the Q matrix
     Q << sigma_x_s*sigma_x_s, sigma_x_s*sigma_x_v,
          sigma_x_v*sigma_x_s, sigma_x_v*sigma_x_v;  
@@ -64,22 +66,21 @@ int main(int argc, char *argv[])
     ekf.setQ(Q);
 
     // Creates a new sensor covariance matrix R
-    auto R = ekf.createR();
+    Aircraft::SensorCovariance R;
     // Fills the R matrix
     R << sigma_y_s*sigma_y_s;
     // Sets the new R to the KF
     ekf.setR(R);
 
     // Creates two states vectors, one for the simulation and one for the kalman output
-    auto x = ekf.state();
-    auto xK = ekf.state();
+    Aircraft::State x, xK;
 
     // Creates an input vector and fills it
-    auto u = ekf.input();
+    Aircraft::Input u;
     u << 0.1;
 
     // Creates an output vector
-    auto y = ekf.output();
+    Aircraft::Output y;
 
     // Creates auxialiary vector just for plotting purposes
     vector<float> X, XK, Y, TS, V, VK;

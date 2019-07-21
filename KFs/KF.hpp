@@ -20,23 +20,39 @@ class KF
         typedef Matrix<dataType, outputs, outputs> MatPxP;
         typedef Matrix<dataType, inputs, 1> MatMx1;
         typedef Matrix<dataType, outputs, 1> MatPx1;
-        typedef void (*ProcessFunction)(MatNxN &A, MatNxM &B, MatPxN &C, double dt);
+
+    public:
+        typedef MatNx1 State;
+        typedef MatMx1 Input;
+        typedef MatPx1 Output;
+        typedef MatNxN ModelCovariance;
+        typedef MatPxP SensorCovariance;
+        typedef MatNxN StateMatrix;
+        typedef MatNxM InputMatrix;
+        typedef MatPxN OutputMatrix;
+        
+    private:
+        typedef void (*ProcessFunction)(StateMatrix &A, InputMatrix &B, OutputMatrix &C, double dt);
 
         std::default_random_engine gen;
         std::normal_distribution<double> distr{0.0, 1.0};
         std::chrono::time_point<std::chrono::high_resolution_clock> start;
 
-        MatNx1 x, randX;
-        MatNxN A, Q, P;
-        MatNxM B;
-        MatPxN C;
-        MatPxP R;
+        State x;
+        StateMatrix A;
+        ModelCovariance Q;
+        InputMatrix B;
+        OutputMatrix C;
+        SensorCovariance R;
+        
+        MatNx1 randX;
         MatPx1 randY;
 
+        MatNxN P;
         MatNxN Qsqrt;
         MatPxP Rsqrt;
 
-        MatPx1 z, yError;
+        Output z, yError;
         MatPxP S;
         MatNxP K;
         MatNxN I;
@@ -64,20 +80,20 @@ class KF
             init();
         }
 
-        KF(MatNx1 X) : x(X)
+        KF(State X) : x(X)
         {
             Q.setIdentity();
             R.setIdentity();
             init();
         }
 
-        KF(MatNxN Q, MatPxP R) : Q(Q), R(R)
+        KF(ModelCovariance Q, SensorCovariance R) : Q(Q), R(R)
         {
             x.setZero();
             init();
         }
 
-        KF(MatNx1 X, MatNxN Q, MatPx1 R) : x(X), Q(Q), R(R)
+        KF(State X, ModelCovariance Q, SensorCovariance R) : x(X), Q(Q), R(R)
         {
             init();
         }
@@ -97,49 +113,49 @@ class KF
             gen = std::default_random_engine(s);
         }
 
-        MatNx1 state()
+        State state()
         {
-            MatNx1 x;
+            State x;
             x.setZero();
             return x;
         }
 
-        MatMx1 input()
+        Input input()
         {
-            MatMx1 u;
+            Input u;
             u.setZero();
             return u;
         }
 
-        MatPx1 output()
+        Output output()
         {
-            MatPx1 y;
+            Output y;
             y.setZero();
             return y;
         }
 
-        MatNxN createQ()
+        ModelCovariance createQ()
         {
-            MatNxN Q;
+            ModelCovariance Q;
             Q.setZero();
             return Q;
         }
 
-        MatPxP createR()
+        SensorCovariance createR()
         {
-            MatPxP R;
+            SensorCovariance R;
             R.setZero();
             return R;
         }
 
-        void setQ(MatNxN Q)
+        void setQ(ModelCovariance Q)
         {
             this->Q = Q;
             P = Q;
             Qsqrt = Q.cwiseSqrt();
         }
 
-        void setR(MatPxP R)
+        void setR(SensorCovariance R)
         {
             this->R = R;
             Rsqrt = R.cwiseSqrt();
@@ -169,12 +185,12 @@ class KF
             processFn = fn;
         }
 
-        virtual void process(MatNxN &A, MatNxM &B, MatPxN &C, double dt)
+        virtual void process(StateMatrix &A, InputMatrix &B, OutputMatrix &C, double dt)
         {
 
         }
 
-        void simulate(MatNx1 &x, MatPx1 &y, MatMx1 &u, double dt)
+        void simulate(State &x, Output &y, Input &u, double dt)
         {
             doProcess(dt);
 
@@ -185,7 +201,7 @@ class KF
             y = C * x + Rsqrt * randY;
         }
 
-        void run(MatNx1 &xK, MatPx1 &y, MatMx1 &u, double dt)
+        void run(State &xK, Output &y, Input &u, double dt)
         {
             predict(u, dt);
             update(y);
@@ -193,14 +209,14 @@ class KF
         }
 
     private:
-        void predict(MatMx1 &u, double dt)
+        void predict(Input &u, double dt)
         {
             doProcess(dt);
             x = A * x + B * u;
             P = A * P * A.transpose() + Q;
         }
 
-        void update(MatPx1 &y)
+        void update(Output &y)
         {
             z = C * x;
             yError = y - z;

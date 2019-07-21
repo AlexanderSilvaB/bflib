@@ -11,22 +11,24 @@ using namespace std;
 namespace plt = matplotlibcpp;
 #endif
 
-void model(Matrix<float, 1, 1> &x, Matrix<float, 1, 1> &u, double dt)
+typedef EKF<float, 1, 1, 1> Sine;
+
+void model(Sine::State &x, Sine::Input &u, double dt)
 {
     x << sin(u(0));
 }
 
-void sensor(Matrix<float, 1, 1> &y, Matrix<float, 1, 1> &x, Matrix<float, -1, 1> &d, double dt)
+void sensor(Sine::Output &y, Sine::State &x, Sine::Data &d, double dt)
 {
     y << x(0);
 }
 
-void modelJ(Matrix<float, 1, 1> &F, Matrix<float, 1, 1> &x, Matrix<float, 1, 1> &u, double dt)
+void modelJ(Sine::ModelJacobian &F, Sine::State &x, Sine::Input &u, double dt)
 {
     F << 1;
 }
 
-void sensorJ(Matrix<float, 1, 1> &H, Matrix<float, 1, 1> &x, Matrix<float, -1, 1> &d, double dt)
+void sensorJ(Sine::SensorJacobian &H, Sine::State &x, Sine::Data &d, double dt)
 {
     H << 1;
 }
@@ -36,29 +38,28 @@ int main(int argc, char *argv[])
     float sigma_x = 0.01;
     float sigma_y = 5.0;
 
-    Matrix<float, 1, 1> x0;
+    Sine::State x0;
     x0 << 20;
 
-    EKF<float, 1, 1, 1> ekf(x0);
+    Sine ekf(x0);
     ekf.setModel(model);
     ekf.setSensor(sensor);
     ekf.setModelJacobian(modelJ);
     ekf.setSensorJacobian(sensorJ);
 
-    auto Q = ekf.createQ();
+    Sine::ModelCovariance Q;
     Q << sigma_x*sigma_x;  
     ekf.setQ(Q);
 
-    auto R = ekf.createR();
+    Sine::SensorCovariance R;
     R << sigma_y*sigma_y;
     ekf.setR(R);
 
 
-    auto x = ekf.state();
-    auto xK = ekf.state();
+    Sine::State x = x0, xK;
 
-    auto u = ekf.input();
-    auto y = ekf.output();
+    Sine::Input u;
+    Sine::Output y;
 
     vector<float> X, XK, Y, TS;
 

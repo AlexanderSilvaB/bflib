@@ -22,27 +22,46 @@ class EKF
         typedef Matrix<dataType, outputs, 1> MatPx1;
         typedef Matrix<dataType, dataConverter, 1> MatDx1;
 
-        typedef void (*ModelFunction)(MatNx1 &x, MatMx1 &u, double dt);
-        typedef void (*SensorFunction)(MatPx1 &y, MatNx1 &x, MatDx1 &d, double dt);
-        typedef void (*ModelJacobianFunction)(MatNxN &F, MatNx1 &x, MatMx1 &u, double dt);
-        typedef void (*SensorJacobianFunction)(MatPxN &H, MatNx1 &x, MatDx1 &d, double dt);
+    public:
+        typedef MatNx1 State;
+        typedef MatMx1 Input;
+        typedef MatPx1 Output;
+        typedef MatNxN ModelCovariance;
+        typedef MatPxP SensorCovariance;
+        typedef MatNxN StateMatrix;
+        typedef MatNxM InputMatrix;
+        typedef MatPxN OutputMatrix;
+        typedef MatNxN ModelJacobian;
+        typedef MatPxN SensorJacobian;
+        typedef MatDx1 Data;
+
+    private:
+        typedef void (*ModelFunction)(State &x, Input &u, double dt);
+        typedef void (*SensorFunction)(Output &y, State &x, Data &d, double dt);
+        typedef void (*ModelJacobianFunction)(ModelJacobian &F, State &x, Input &u, double dt);
+        typedef void (*SensorJacobianFunction)(SensorJacobian &H, State &x, Data &d, double dt);
 
         std::default_random_engine gen;
         std::normal_distribution<double> distr{0.0, 1.0};
         std::chrono::time_point<std::chrono::high_resolution_clock> start;
 
-        MatNx1 x, x_1, randX;
-        MatNxN Q, P;
-        MatPxP R;
-        MatPx1 z, randY;
+        State x, x_1;
+        ModelCovariance Q;
+        SensorCovariance R;
+        Output z;
 
-        std::vector<MatDx1> dataPoints;
+        ModelJacobian F;
+        SensorJacobian H;
+
+        std::vector<Data> dataPoints;
     
+        MatNx1 randX;
+        MatPx1 randY;
+
+        MatNxN P;
         MatNxN Qsqrt;
         MatPxP Rsqrt;
 
-        MatNxN F;
-        MatPxN H;
         MatPxP S;
         MatNxP K;
         MatNxN I;
@@ -68,6 +87,7 @@ class EKF
             start = std::chrono::high_resolution_clock::now();
         }
     public:
+
         EKF()
         {
             Q.setIdentity();
@@ -76,20 +96,20 @@ class EKF
             init();
         }
 
-        EKF(MatNx1 X) : x(X)
+        EKF(State X) : x(X)
         {
             Q.setIdentity();
             R.setIdentity();
             init();
         }
 
-        EKF(MatNxN Q, MatPxP R) : Q(Q), R(R)
+        EKF(ModelCovariance Q, SensorCovariance R) : Q(Q), R(R)
         {
             x.setZero();
             init();
         }
 
-        EKF(MatNx1 X, MatNxN Q, MatPx1 R) : x(X), Q(Q), R(R)
+        EKF(State X, ModelCovariance Q, SensorCovariance R) : x(X), Q(Q), R(R)
         {
             init();
         }
@@ -109,56 +129,56 @@ class EKF
             gen = std::default_random_engine(s);
         }
 
-        MatNx1 state()
+        State state()
         {
             MatNx1 x;
             x.setZero();
             return x;
         }
 
-        MatMx1 input()
+        Input input()
         {
             MatMx1 u;
             u.setZero();
             return u;
         }
 
-        MatPx1 output()
+        Output output()
         {
             MatPx1 y;
             y.setZero();
             return y;
         }
 
-        MatNxN createQ()
+        ModelCovariance createQ()
         {
-            MatNxN Q;
+            ModelCovariance Q;
             Q.setZero();
             return Q;
         }
 
-        MatPxP createR()
+        SensorCovariance createR()
         {
-            MatPxP R;
+            SensorCovariance R;
             R.setZero();
             return R;
         }
 
-        MatDx1 createData()
+        Data createData()
         {
-            MatDx1 D;
+            Data D;
             D.setZero();
             return D;
         }
 
-        void setQ(MatNxN Q)
+        void setQ(ModelCovariance Q)
         {
             this->Q = Q;
             P = Q;
             Qsqrt = Q.cwiseSqrt();
         }
 
-        void setR(MatPxP R)
+        void setR(SensorCovariance R)
         {
             this->R = R;
             Rsqrt = R.cwiseSqrt();
@@ -183,17 +203,17 @@ class EKF
             return ellapsed;
         }
 
-        void addData(MatDx1 &data)
+        void addData(Data &data)
         {
             dataPoints.push_back(data);
         }
 
-        void fillData(std::vector<MatDx1> &data)
+        void fillData(std::vector<Data> &data)
         {
             dataPoints = data;
         }
 
-        std::vector<MatDx1>& data()
+        std::vector<Data>& data()
         {
             return dataPoints;
         }
@@ -218,29 +238,29 @@ class EKF
             sensorJFn = fn;
         }
 
-        virtual void model(MatNx1 &x, MatMx1 &u, double dt)
+        virtual void model(State &x, Input &u, double dt)
         {
 
         }
 
-        virtual void sensor(MatPx1 &z, MatNx1 &x, MatDx1 &d, double dt)
+        virtual void sensor(Output &z, State &x, Data &d, double dt)
         {
 
         }
 
-        virtual void modelJacobian(MatNxN &F, MatNx1 &x, MatMx1 &u, double dt)
+        virtual void modelJacobian(ModelJacobian &F, State &x, Input &u, double dt)
         {
 
         }
 
-        virtual void sensorJacobian(MatPxN &H, MatNx1 &x, MatDx1 &d, double dt)
+        virtual void sensorJacobian(SensorJacobian &H, State &x, Data &d, double dt)
         {
 
         }
 
-        void simulate(MatNx1 &x, MatPx1 &y, MatMx1 &u, double dt)
+        void simulate(State &x, Output &y, Input &u, double dt)
         {
-            MatDx1 data;
+            Data data;
             randn(data);
 
             if(dataPoints.size() > 0)
@@ -255,7 +275,7 @@ class EKF
             y = y + Rsqrt * randY;
         }
 
-        void simulate(MatNx1 &x, std::vector<MatPx1> &y, MatMx1 &u, double dt)
+        void simulate(State &x, std::vector<Output> &y, Input &u, double dt)
         {
             doModel(x, u, dt);
             randn(randX);
@@ -283,7 +303,7 @@ class EKF
             }
         }
 
-        void run(MatNx1 &xK, MatPx1 &y, MatMx1 &u, double dt)
+        void run(State &xK, Output &y, Input &u, double dt)
         {
             predict(u, dt);
 
@@ -296,7 +316,7 @@ class EKF
             xK = x;
         }
 
-        void run(MatNx1 &xK, std::vector<MatPx1> &y, MatMx1 &u, double dt)
+        void run(State &xK, std::vector<Output> &y, Input &u, double dt)
         {
             predict(u, dt);
 
@@ -312,7 +332,7 @@ class EKF
         }
 
     private:
-        void predict(MatMx1 &u, double dt)
+        void predict(Input &u, double dt)
         {
             x_1 = x;
             doModel(x, u, dt);
@@ -320,7 +340,7 @@ class EKF
             P = F * P * F.transpose() + Q;
         }
 
-        void update(MatPx1 &y, MatDx1 &d, double dt)
+        void update(Output &y, Data &d, double dt)
         {
             doSensorJ(H, x, d, dt);
 
@@ -331,7 +351,7 @@ class EKF
             P = (I - K * H) * P;
         }
 
-        void dataAssoc(std::vector<MatPx1> &y, std::vector<MatDx1> &data, double dt)
+        void dataAssoc(std::vector<Output> &y, std::vector<Data> &data, double dt)
         {
             if(dataPoints.size() == 0)
                 return;
@@ -339,7 +359,7 @@ class EKF
             dataType minX, X;
             int minJ;
             Matrix<dataType, 1, 1> Xsq;
-            MatDx1 d;
+            Data d;
 
             for(int i = 0; i < y.size(); i++)
             {
@@ -369,7 +389,7 @@ class EKF
             }
         }
 
-        void doModel(MatNx1 &x, MatMx1 &u, double dt)
+        void doModel(State &x, Input &u, double dt)
         {
             if(modelFn != NULL)
                 modelFn(x, u, dt);
@@ -377,7 +397,7 @@ class EKF
                 model(x, u, dt);
         }
 
-        void doSensor(MatPx1 &z, MatNx1 &x, MatDx1 &d, double dt)
+        void doSensor(Output &z, State &x, Data &d, double dt)
         {
             if(sensorFn != NULL)
                 sensorFn(z, x, d, dt);
@@ -385,7 +405,7 @@ class EKF
                 sensor(z, x, d, dt);
         }
 
-        void doModelJ(MatNxN &F, MatNx1 &x, MatMx1 &u, double dt)
+        void doModelJ(ModelJacobian &F, State &x, Input &u, double dt)
         {
             if(modelJFn != NULL)
                 modelJFn(F, x, u, dt);
@@ -393,7 +413,7 @@ class EKF
                 modelJacobian(F, x, u, dt);
         }
 
-        void doSensorJ(MatPxN &H, MatNx1 &x, MatDx1 &d, double dt)
+        void doSensorJ(SensorJacobian &H, State &x, Data &d, double dt)
         {
             if(sensorJFn != NULL)
                 sensorJFn(H, x, d, dt);

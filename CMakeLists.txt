@@ -9,8 +9,8 @@ find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(
-  ${PROJECT_NAME}
-  INTERFACE $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/bflib>
+${PROJECT_NAME}
+INTERFACE $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/bflib>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_link_libraries (${PROJECT_NAME} INTERFACE Eigen3::Eigen)
 
@@ -39,5 +39,10 @@ install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/bflib DESTINATION include)
 
-# Samples
-add_subdirectory(samples)   
+get_directory_property(has_parent PARENT_DIRECTORY)
+if(NOT has_parent)
+    # Samples
+    if(BUILD_SAMPLES)
+        add_subdirectory(samples)  
+    endif(BUILD_SAMPLES) 
+endif()

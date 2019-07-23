@@ -1,8 +1,8 @@
-#include <KFs/KF.hpp>
+#include <bflib/KF.hpp>
 #include <iostream>
 #include <vector>
 #ifdef PLOT
-#include "matplotlibcpp.h"
+#include "external/matplotlibcpp.h"
 #endif
 
 using namespace std;

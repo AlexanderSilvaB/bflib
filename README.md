@@ -1,2 +1,2 @@
-# KFs
-Kalman Filters C++ Library
+# bflib
+Bayes Filters Library

@@ -1,9 +1,9 @@
-#include <KFs/EKF.hpp>
+#include <bflib/EKF.hpp>
 #include <iostream>
 #include <vector>
 #include <cmath>
 #ifdef PLOT
-#include "matplotlibcpp.h"
+#include "external/matplotlibcpp.h"
 #endif
 
 using namespace std;

@@ -26,6 +26,8 @@ class EKF
         typedef MatNx1 State;
         typedef MatMx1 Input;
         typedef MatPx1 Output;
+        typedef Input Control;
+        typedef Output Sensor;
         typedef MatNxN ModelCovariance;
         typedef MatPxP SensorCovariance;
         typedef MatNxN StateMatrix;

@@ -30,5 +30,8 @@ target_link_libraries(sine bflib ${PYTHON_LIBRARIES})
 add_executable(pendulum pendulum.cpp)
 target_link_libraries(pendulum bflib ${PYTHON_LIBRARIES})
 
-add_executable(robot_localization robot_localization.cpp)
-target_link_libraries(robot_localization bflib ${PYTHON_LIBRARIES})
+add_executable(robot_localization_ekf robot_localization_ekf.cpp)
+target_link_libraries(robot_localization_ekf bflib ${PYTHON_LIBRARIES})
+
+add_executable(robot_localization_mc robot_localization_mc.cpp)
+target_link_libraries(robot_localization_mc bflib ${PYTHON_LIBRARIES})

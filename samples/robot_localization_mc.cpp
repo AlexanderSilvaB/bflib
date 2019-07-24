@@ -26,19 +26,19 @@ const int S = 9;
 typedef MC<double, 3, 2, 2, S> Robot;
 
 // Limits of the world
-Robot::State minState(0000, 0000, 0);
-Robot::State maxState(4680, 3200, 2*PI);
+Robot::State minState(0.000, 0.000, 0);
+Robot::State maxState(4.680, 3.200, 2*PI);
 
 // World lines
-vector< Vector4d > lines{   Vector4d(0000,  0000,   4680,   0000),
-                            Vector4d(0000,  0000,   0000,   3200),
-                            Vector4d(0000,  3200,   4680,   3200),
-                            Vector4d(4680,  0000,   4680,   3200),
-                            Vector4d(0000,  2280,    920,   2280),
-                            Vector4d( 920,  2280,    920,   3200),
-                            Vector4d(4190,  2850,   4680,   2850),
-                            Vector4d(4190,  2850,   4190,   3200),
-                            Vector4d(4030,  0000,   4680,   0650) };
+vector< Vector4d > lines{   Vector4d(0.000,  0.000,   4.680,   0.000),
+                            Vector4d(0.000,  0.000,   0.000,   3.200),
+                            Vector4d(0.000,  3.200,   4.680,   3.200),
+                            Vector4d(4.680,  0.000,   4.680,   3.200),
+                            Vector4d(0.000,  2.280,   0.920,   2.280),
+                            Vector4d(0.920,  2.280,   0.920,   3.200),
+                            Vector4d(4.190,  2.850,   4.680,   2.850),
+                            Vector4d(4.190,  2.850,   4.190,   3.200),
+                            Vector4d(4.030,  0.000,   4.680,   0.650) };
 
 /*
     The model function
@@ -121,11 +121,11 @@ void sensor(vector<Robot::Output> &y, Robot::State &x, double dt)
 int main(int argc, char *argv[])
 {
     // Defines the standard deviations for the resample and the sensor
-    double sigma_x_x = 40;
-    double sigma_x_y = 40;
-    double sigma_x_a = 0.3;
-    double sigma_y_r = 100;
-    double sigma_y_b = 0;
+    double sigma_x_x = 0.04;
+    double sigma_x_y = 0.04;
+    double sigma_x_a = 0.30;
+    double sigma_y_r = 0.10;
+    double sigma_y_b = 0.00;
 
     // Number of particles
     int N = 1000 ;
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
     mc.setR(R);
 
     // Variables to hold the system state, the predicted state and the input
-    Robot::State x(2000, 1000, 0);
+    Robot::State x(2.000, 1.000, 0);
     Robot::State xP;
     Robot::Input u;
 
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
     vector<Robot::Output> y(S);
 
     // Initializes the input variable (linear speed = 1.0f m/s ; angular speed = 0.2f rad/s)
-    u << 1000.0f, 1.57f;
+    u << 1.0000f, 1.57f;
     // u << 0, 0;
 
     // Auxiliary variables to plot

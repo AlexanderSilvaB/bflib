@@ -1,2 +1,2 @@
 # bflib
-Bayes Filters Library
+Bayesian Filters Library

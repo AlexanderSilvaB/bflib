@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     double sigma_y_b = 0.00;
 
     // Number of particles
-    int N = 1000 ;
+    int N = 500 ;
 
     // Create a new monte carlo filter for the robot with max of 1000 particles
     Robot mc(N, minState, maxState);
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     vector<double> X, Y, XP, YP;
 
     // Defines the simulation (3s of duration, 0.01s for sample time)
-    double T = 3;
+    double T = 5;
     double dt = 0.01;
 
     // Run the simulation
@@ -189,8 +189,8 @@ int main(int argc, char *argv[])
         XP.push_back(xP(0));
         YP.push_back(xP(1));
 
-        cout << x << endl;
-        cout << xP << endl;
+        cout << "x = " << x << endl;
+        cout << "xP = " << xP << endl;
 
         // Increment the simulation time
         t += dt;

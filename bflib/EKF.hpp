@@ -21,6 +21,7 @@ class EKF
         typedef Matrix<dataType, inputs, 1> MatMx1;
         typedef Matrix<dataType, outputs, 1> MatPx1;
         typedef Matrix<dataType, dataConverter, 1> MatDx1;
+        typedef Matrix<dataType, 3, 1> Mat3x1;
 
     public:
         typedef MatNx1 State;
@@ -36,6 +37,7 @@ class EKF
         typedef MatNxN ModelJacobian;
         typedef MatPxN SensorJacobian;
         typedef MatDx1 Data;
+        typedef Mat3x1 Confidence;
 
     private:
         typedef void (*ModelFunction)(State &x, Input &u, double dt);
@@ -171,6 +173,35 @@ class EKF
             Data D;
             D.setZero();
             return D;
+        }
+
+        ModelCovariance getP()
+        {
+            return P;
+        }
+
+        Confidence getConfidence(unsigned int x1, unsigned int x2)
+        {
+            Confidence C;
+            C.setZero();
+            if(x1 >= states || x2 >= states)
+                return C;
+            
+            Matrix<dataType, 2, 2> p;
+            p(0, 0) = P(x1, x1);
+            p(0, 1) = P(x1, x2);
+            p(1, 0) = P(x2, x1);
+            p(1, 1) = P(x2, x2);
+
+            EigenSolver< Matrix<dataType, 2, 2> > es(p);
+            Matrix<dataType, 2, 2> eValue = es.pseudoEigenvalueMatrix();
+            Matrix<dataType, 2, 2> eVector = es.pseudoEigenvectors();
+
+            C[0] = eValue(0,0);
+            C[1] = eValue(1,1);
+            C[2] = std::atan2(eVector(0, 1), eVector(0, 0));
+
+            return C;
         }
 
         void setQ(ModelCovariance Q)

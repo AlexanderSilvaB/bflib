@@ -2,13 +2,17 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#ifdef PLOT
+#if defined PLOT && ! defined PLOT_REALTIME
 #include "external/matplotlibcpp.h"
 #endif
 
 using namespace std;
-#ifdef PLOT
+#if defined PLOT && ! defined PLOT_REALTIME
 namespace plt = matplotlibcpp;
+#endif
+
+#ifdef PLOT_REALTIME
+#include <opencv2/opencv.hpp>
 #endif
 
 const float PI = 3.14159265358979f;
@@ -118,6 +122,63 @@ void sensor(vector<Robot::Output> &y, Robot::State &x, double dt)
     }
 }
 
+#ifdef PLOT_REALTIME
+void drawLines(cv::Mat& image, const vector< Vector4d >& lines, const cv::Scalar& color)
+{
+    for(int i = 0; i < lines.size(); i++)
+    {
+        cv::line(image, 
+            cv::Point(10 + lines[i](0) * 100, 10 + lines[i](1) * 100), 
+            cv::Point(10 + lines[i](2) * 100, 10 + lines[i](3) * 100),
+            color, 2);
+    }
+}
+
+void drawParticles(cv::Mat& image, const vector< Robot::State >& PS, const cv::Scalar& color)
+{
+    for(int i = 0; i < PS.size(); i++)
+    {
+        cv::circle(image, cv::Point(10 + 100 * PS[i][0], 10 + 100 * PS[i][1]), 2, color, CV_FILLED);
+    }
+}
+
+void drawPath(cv::Mat& image, const vector<double>& X, const vector<double>& Y, const cv::Scalar& color, bool strip)
+{
+    int S = min(X.size(), Y.size());
+    vector<cv::Point> points(S);
+    for(int i = 0; i < S; i++)
+    {
+        points[i] = cv::Point(10 + 100 * X[i], 10 + 100 * Y[i]);
+    }
+    if(strip)
+    {
+        for(int i = 0; i < S - 1; i += 4)
+        {
+            cv::line(image, points[i], points[i + 1], color, 1, cv::LINE_AA);
+        }
+    }
+    else
+        cv::polylines(image, points, false, color, 1, cv::LINE_AA);
+    cv::circle(image, points.back(), 5, color, CV_FILLED);
+}
+
+void drawSensor(cv::Mat& image, const Robot::State& X, const vector< Robot::Output >& Y, const cv::Scalar& color)
+{
+    cv::Point pt1, ptR;
+
+    ptR.x = 10 + 100 * X[0];
+    ptR.y = 10 + 100 * X[1];
+
+    for(int i = 0; i < Y.size(); i++)
+    {
+        pt1.x = 10 + 100 * ( X[0] + Y[i][0] * cos( Y[i][1] + X[2] ) );
+        pt1.y = 10 + 100 * ( X[1] + Y[i][0] * sin( Y[i][1] + X[2] ) );
+        cv::line(image, ptR, pt1, color, 1);
+        cv::circle(image, pt1, 3, color, CV_FILLED);
+    }
+}
+#endif
+
 int main(int argc, char *argv[])
 {
     // Defines the standard deviations for the resample and the sensor
@@ -172,6 +233,11 @@ int main(int argc, char *argv[])
     double T = 5;
     double dt = 0.01;
 
+    // Realtime plot initialization
+    #ifdef PLOT_REALTIME
+    cv::Mat image(500, 500, CV_8UC3);
+    #endif
+
     // Run the simulation
     double t = 0;
     while (t < T)
@@ -194,9 +260,31 @@ int main(int argc, char *argv[])
 
         // Increment the simulation time
         t += dt;
+
+        // Realtime plot
+        #ifdef PLOT_REALTIME
+        image.setTo(cv::Scalar(255, 255, 255));
+
+        drawLines(image, lines, cv::Scalar(0, 0, 0));
+        drawParticles(image, mc.particles(), cv::Scalar(255, 0, 0));
+        drawPath(image, X, Y, cv::Scalar(0, 0, 0), false);
+        drawPath(image, XP, YP, cv::Scalar(0, 0, 255), true);
+        drawSensor(image, xP, y, cv::Scalar(0, 255, 0));
+
+        cv::imshow("Robot Localization MC", image);
+        cv::waitKey((int)(dt * 1000));
+        #endif
     }
 
-    #ifdef PLOT
+
+    // Static Plot
+    #ifdef PLOT_REALTIME
+    cv::imshow("Robot Localization MC", image);
+    cv::waitKey(0);
+    #endif
+
+
+    #if defined PLOT && ! defined PLOT_REALTIME
     vector<double> x_, y_;
     plt::title("Position");
     for(int i = 0; i < lines.size(); i++)

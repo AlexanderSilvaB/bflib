@@ -37,7 +37,7 @@ class EKF
         typedef MatNxN ModelJacobian;
         typedef MatPxN SensorJacobian;
         typedef MatDx1 Data;
-        typedef Mat3x1 Confidence;
+        typedef Mat3x1 Uncertainty;
 
     private:
         typedef void (*ModelFunction)(State &x, Input &u, double dt);
@@ -180,9 +180,9 @@ class EKF
             return P;
         }
 
-        Confidence getConfidence(unsigned int x1, unsigned int x2)
+        Uncertainty getUncertainty(unsigned int x1, unsigned int x2)
         {
-            Confidence C;
+            Uncertainty C;
             C.setZero();
             if(x1 >= states || x2 >= states)
                 return C;

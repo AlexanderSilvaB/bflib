@@ -86,7 +86,7 @@ void sensorJ(Robot::SensorJacobian &H, Robot::State &x, Robot::Data &d, double d
 }
 
 #ifdef PLOT_REALTIME
-void drawPath(cv::Mat& image, const vector<double>& X, const vector<double>& Y, const cv::Scalar& color, bool strip)
+void drawPath(cv::Mat& image, const Robot::State& XR, const vector<double>& X, const vector<double>& Y, const cv::Scalar& color, bool strip)
 {
     int S = min(X.size(), Y.size());
     vector<cv::Point> points(S);
@@ -104,6 +104,11 @@ void drawPath(cv::Mat& image, const vector<double>& X, const vector<double>& Y, 
     else
         cv::polylines(image, points, false, color, 1, cv::LINE_AA);
     cv::circle(image, points.back(), 5, color, CV_FILLED);
+
+    cv::Point pf;
+    pf.x = (250 + 20 * XR[0]) + 10 * cos(XR[2]);
+    pf.y = (100 + 20 * XR[1]) + 10 * sin(XR[2]);
+    cv::line(image, points.back(), pf, color, 2, cv::LINE_AA);
 }
 
 void drawSensor(cv::Mat& image, const Robot::State& X, const vector< Robot::Output >& Y, const cv::Scalar& color)
@@ -122,7 +127,7 @@ void drawSensor(cv::Mat& image, const Robot::State& X, const vector< Robot::Outp
     }
 }
 
-void drawConfidence(cv::Mat& image, const Robot::State& X, const Robot::Confidence& C, const cv::Scalar& color)
+void drawUncertainty(cv::Mat& image, const Robot::State& X, const Robot::Uncertainty& C, const cv::Scalar& color)
 {
     cv::Size size(C[0]*1000000, C[1]*1000000);
     double angle = C[2] / 3.14 * 180;
@@ -234,10 +239,10 @@ int main(int argc, char *argv[])
         #ifdef PLOT_REALTIME
         image.setTo(cv::Scalar(255, 255, 255));
 
-        drawConfidence(image, xK, ekf.getConfidence(0, 1), cv::Scalar(255, 0, 0));
-        drawPath(image, X, Y, cv::Scalar(0, 0, 0), false);
-        drawPath(image, XK, YK, cv::Scalar(0, 0, 255), true);
+        drawUncertainty(image, xK, ekf.getUncertainty(0, 1), cv::Scalar(255, 0, 0));
         drawSensor(image, xK, y, cv::Scalar(0, 255, 0));
+        drawPath(image, x, X, Y, cv::Scalar(0, 0, 0), false);
+        drawPath(image, xK, XK, YK, cv::Scalar(0, 0, 255), true);
 
         cv::imshow("Robot Localization EKF", image);
         cv::waitKey((int)(dt * 1000));

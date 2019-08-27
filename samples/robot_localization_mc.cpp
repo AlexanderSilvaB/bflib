@@ -71,7 +71,8 @@ void model(Robot::State &x, Robot::Input &u, double dt)
 */
 void sensor(vector<Robot::Output> &y, Robot::State &x, double dt)
 {
-    double eps = 0.1;
+    double eps = 0.001;
+    double pEps = 0.01;
     double step = (PI / 2.0) / S;
     double angle;
     int start = (S / 2);
@@ -106,7 +107,7 @@ void sensor(vector<Robot::Output> &y, Robot::State &x, double dt)
                 dth = abs(angle - thP);
                 if(dth < eps)
                 {
-                    if(min(x3, x4)-1 <= px && px <= max(x3, x4)+1 && min(y3, y4)-1 <= py && py <= max(y3, y4)+1)
+                    if(min(x3, x4)-pEps <= px && px <= max(x3, x4)+pEps && min(y3, y4)-pEps <= py && py <= max(y3, y4)+pEps)
                     {
                         dist_i = sqrt( (x1 - px)*(x1 - px) + (y1 - py)*(y1 - py) );
                         if(dist < 0)
@@ -142,7 +143,7 @@ void drawParticles(cv::Mat& image, const vector< Robot::State >& PS, const cv::S
     }
 }
 
-void drawPath(cv::Mat& image, const vector<double>& X, const vector<double>& Y, const cv::Scalar& color, bool strip)
+void drawPath(cv::Mat& image, const Robot::State& XR, const vector<double>& X, const vector<double>& Y, const cv::Scalar& color, bool strip)
 {
     int S = min(X.size(), Y.size());
     vector<cv::Point> points(S);
@@ -160,6 +161,11 @@ void drawPath(cv::Mat& image, const vector<double>& X, const vector<double>& Y, 
     else
         cv::polylines(image, points, false, color, 1, cv::LINE_AA);
     cv::circle(image, points.back(), 5, color, CV_FILLED);
+    
+    cv::Point pf;
+    pf.x = (10 + 100 * XR[0]) + 10 * cos(XR[2]);
+    pf.y = (10 + 100 * XR[1]) + 10 * sin(XR[2]);
+    cv::line(image, points.back(), pf, color, 2, cv::LINE_AA);
 }
 
 void drawSensor(cv::Mat& image, const Robot::State& X, const vector< Robot::Output >& Y, const cv::Scalar& color)
@@ -267,9 +273,9 @@ int main(int argc, char *argv[])
 
         drawLines(image, lines, cv::Scalar(0, 0, 0));
         drawParticles(image, mc.particles(), cv::Scalar(255, 0, 0));
-        drawPath(image, X, Y, cv::Scalar(0, 0, 0), false);
-        drawPath(image, XP, YP, cv::Scalar(0, 0, 255), true);
         drawSensor(image, xP, y, cv::Scalar(0, 255, 0));
+        drawPath(image, x, X, Y, cv::Scalar(0, 0, 0), false);
+        drawPath(image, xP, XP, YP, cv::Scalar(0, 0, 255), true);
 
         cv::imshow("Robot Localization MC", image);
         cv::waitKey((int)(dt * 1000));

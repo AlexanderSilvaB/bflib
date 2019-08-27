@@ -33,7 +33,7 @@ class KF
         typedef MatNxN StateMatrix;
         typedef MatNxM InputMatrix;
         typedef MatPxN OutputMatrix;
-        typedef Mat3x1 Confidence;
+        typedef Mat3x1 Uncertainty;
         
     private:
         typedef void (*ProcessFunction)(StateMatrix &A, InputMatrix &B, OutputMatrix &C, double dt);
@@ -157,9 +157,9 @@ class KF
             return P;
         }
 
-        Confidence getConfidence(unsigned int x1, unsigned int x2)
+        Uncertainty getUncertainty(unsigned int x1, unsigned int x2)
         {
-            Confidence C;
+            Uncertainty C;
             C.setZero();
             if(x1 >= states || x2 >= states)
                 return C;

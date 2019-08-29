@@ -7,12 +7,16 @@ include(GNUInstallDirs)
 
 find_package (Eigen3 REQUIRED NO_MODULE)
 
+include_directories(${EIGEN3_INCLUDE_DIRS})
+
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(
 ${PROJECT_NAME}
 INTERFACE $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/bflib>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_link_libraries (${PROJECT_NAME} INTERFACE Eigen3::Eigen)
+# target_link_libraries (${PROJECT_NAME} INTERFACE Eigen3::Eigen)
+target_include_directories(${PROJECT_NAME} INTERFACE ${EIGEN3_INCLUDE_DIRS})
+
 
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_11)
 

@@ -5,7 +5,7 @@ option(BUILD_SAMPLES "Build the library samples" ON)
 
 include(GNUInstallDirs)
 
-find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+find_package (Eigen3 REQUIRED NO_MODULE)
 
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(

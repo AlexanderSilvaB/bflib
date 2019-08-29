@@ -1,0 +1,11 @@
+language: cpp
+cache: ccache
+before_install:
+  - sudo apt-get install -y libeigen3-dev python-dev libopencv-dev python3-opencv 
+addons:
+  apt:
+    update: true
+    packages: 
+      - cmake
+      - cmake-data
+script: mkdir build && cd build && cmake .. && make

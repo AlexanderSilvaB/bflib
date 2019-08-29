@@ -98,17 +98,17 @@ void drawPath(cv::Mat& image, const Robot::State& XR, const vector<double>& X, c
     {
         for(int i = 0; i < S - 1; i += 4)
         {
-            cv::line(image, points[i], points[i + 1], color, 1, cv::LINE_AA);
+            cv::line(image, points[i], points[i + 1], color, 1);
         }
     }
     else
-        cv::polylines(image, points, false, color, 1, cv::LINE_AA);
+        cv::polylines(image, points, false, color, 1);
     cv::circle(image, points.back(), 5, color, CV_FILLED);
 
     cv::Point pf;
     pf.x = (250 + 20 * XR[0]) + 10 * cos(XR[2]);
     pf.y = (100 + 20 * XR[1]) + 10 * sin(XR[2]);
-    cv::line(image, points.back(), pf, color, 2, cv::LINE_AA);
+    cv::line(image, points.back(), pf, color, 2);
 }
 
 void drawSensor(cv::Mat& image, const Robot::State& X, const vector< Robot::Output >& Y, const cv::Scalar& color)
@@ -140,7 +140,7 @@ void drawUncertainty(cv::Mat& image, const Robot::State& X, const Robot::Uncerta
         center, 
         size,
         angle, 
-        0, 360, color, 1, cv::LINE_4);
+        0, 360, color, 1);
 }
 #endif
 

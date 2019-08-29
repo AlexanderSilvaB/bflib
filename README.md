@@ -22,6 +22,7 @@ This library allows the fast implementation of linear and non-linear system pred
 * Simulate process and sensors
 * Time features
 * Access to state uncertainty
+* Built-in data association
 * Easy integration ( Header-Only )
 * Optimized for speed
 * Eigen as the only dependecy for the library (Samples may use LibPython and OpenCV for data visualization )

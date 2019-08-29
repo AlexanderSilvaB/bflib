@@ -32,7 +32,14 @@ This library allows the fast implementation of linear and non-linear system pred
 - [ ] Better documentation
 
 ## Example code
-The Aircraft Takeoff (Linear) without data plotting
+This example shows how to predict an aircraft altitude and speed during a takeoff using an approximated linear system.  This process can be described by the following set of equations:
+<p align="center">
+  <img src="https://latex.codecogs.com/svg.latex?\begin{align*}&space;p[k&plus;1]&space;&=&space;p[k]&space;&plus;&space;v[k]&space;\Delta_t&space;&plus;&space;a&space;\frac{\Delta_t^2}{2}\\&space;v[k&plus;1]&space;&=&space;v[k]&space;&plus;&space;a&space;\Delta_t\\&space;y[k]&space;&=&space;p[k]&space;\end{align*}"/>
+</p>
+These equations can be rewritten as a system of state-space linear equations:
+<p align="center">
+    <img src="https://latex.codecogs.com/svg.latex?\begin{align*}&space;x[k&plus;1]&space;&=&space;\begin{vmatrix}&space;1&space;&&space;\Delta_t\\&space;0&space;&&space;1&space;\end{vmatrix}x&space;&plus;&space;\begin{vmatrix}&space;\frac{\Delta_t^2}{2}\\&space;\Delta_t&space;\end{vmatrix}a\\&space;y[k]&space;&=&space;\begin{vmatrix}&space;1&space;&&space;0&space;\end{vmatrix}x&space;\end{align*}"/>
+</p>
 ```cpp
 #include <bflib/KF.hpp>
 #include <iostream>

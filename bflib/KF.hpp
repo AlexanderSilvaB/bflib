@@ -1,3 +1,12 @@
+// Copyright(c) 2019-present, Alexander Silva Barbosa & bflib contributors.
+// Distributed under the MIT License (http://opensource.org/licenses/MIT)
+
+/**
+ * @author Alexander Silva Barbosa <alexander.ti.ufv@gmail.com>
+ * @date 2019
+ * Kalman Filter
+ */
+
 #pragma once
 
 #include <Eigen/Dense>

@@ -12,8 +12,8 @@ This library allows the fast implementation of linear and non-linear system pred
 | ![Aircraft takeoff linear example](docs/images/linear_aircraft.png?raw=true "Aircraft takeoff") | ![Aircraft takeoff non-linear example](docs/images/non_linear_aircraft.png?raw=true "Aircraft takeoff") |
 | Pendulum (Extended Kalman Filter): [pendulum.cpp](samples/pendulum.cpp) | Sine wave prediction (Extended Kalman Filter): [sine.cpp](samples/sine.cpp) |
 | ![Pendulum](docs/images/pendulum.png?raw=true "Pendulum") | ![Sine](docs/images/sine.png?raw=true "Sine") |
-| Robot localization (Extended Kalman Filter): [robot_localization_ekf.cpp](samples/robot_localization_ekf.cpp) | Robot localization (Particles Filter): [robot_localization_mc.cpp](samples/robot_localization_mc.cpp) |
-| ![Robot Localization Kalman](docs/images/robot_localization_ekf.png?raw=true "Robot Localization Kalman") | ![Robot Localization Monte Carlo](docs/images/robot_localization_mc.png?raw=true "Robot Localization Monte Carlo") |
+| Robot localization (Extended Kalman Filter): [robot_localization_ekf.cpp](samples/robot_localization_ekf.cpp) | Robot localization (Particles Filter): [robot_localization_pf.cpp](samples/robot_localization_pf.cpp) |
+| ![Robot Localization Kalman](docs/images/robot_localization_ekf.png?raw=true "Robot Localization Kalman") | ![Robot Localization Monte Carlo](docs/images/robot_localization_pf.png?raw=true "Robot Localization Monte Carlo") |
 
 ## Features
 * Linear Kalman Filter

@@ -42,5 +42,5 @@ target_link_libraries(pendulum bflib ${PYTHON_LIBRARIES})
 add_executable(robot_localization_ekf robot_localization_ekf.cpp)
 target_link_libraries(robot_localization_ekf bflib ${PYTHON_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(robot_localization_mc robot_localization_mc.cpp)
-target_link_libraries(robot_localization_mc bflib ${PYTHON_LIBRARIES} ${OpenCV_LIBS})
+add_executable(robot_localization_pf robot_localization_pf.cpp)
+target_link_libraries(robot_localization_pf bflib ${PYTHON_LIBRARIES} ${OpenCV_LIBS})

@@ -142,6 +142,18 @@ void drawUncertainty(cv::Mat& image, const Robot::State& X, const Robot::Uncerta
         angle, 
         0, 360, color, 1);
 }
+
+void drawLandmarks(cv::Mat& image, const vector<Robot::Data>& landmarks, const cv::Scalar& color)
+{
+    cv::Point pt;
+
+    for(int i = 0; i < landmarks.size(); i++)
+    {
+        pt.x = 250 + 20 * landmarks[i][0];
+        pt.y = 100 + 20 * landmarks[i][1];
+        cv::circle(image, pt, 5, color, CV_FILLED);
+    }
+}
 #endif
 
 int main(int argc, char *argv[])
@@ -201,10 +213,13 @@ int main(int argc, char *argv[])
     y.resize(3); 
 
     // Initializes the input variable (linear speed = 1.0f m/s ; angular speed = 0.2f rad/s)
-    u << 1.0f, 0.2f;
+    u << 5.0f, 1.0f;
 
     // Auxiliary variables to plot
     vector<double> X, Y, XK, YK;
+
+    // Landmarks
+    vector<Robot::Data> landmarks = ekf.data();
 
     // Defines the simulation (40s of duration, 0.01s for sample time)
     double T = 40;
@@ -240,6 +255,7 @@ int main(int argc, char *argv[])
         image.setTo(cv::Scalar(255, 255, 255));
 
         drawUncertainty(image, xK, ekf.getUncertainty(0, 1), cv::Scalar(255, 0, 0));
+        drawLandmarks(image, landmarks, cv::Scalar(255, 0, 0));
         drawSensor(image, xK, y, cv::Scalar(0, 255, 0));
         drawPath(image, x, X, Y, cv::Scalar(0, 0, 0), false);
         drawPath(image, xK, XK, YK, cv::Scalar(0, 0, 255), true);

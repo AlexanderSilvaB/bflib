@@ -46,6 +46,7 @@ class EKF
         typedef MatNxN ModelJacobian;
         typedef MatPxN SensorJacobian;
         typedef MatDx1 Data;
+        typedef Data Landmark;
         typedef Mat3x1 Uncertainty;
 
     private:
@@ -132,14 +133,16 @@ class EKF
 
         }
 
-        void seed()
+        long long seed()
         {
-            gen = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
+            long long s = std::chrono::system_clock::now().time_since_epoch().count();
+            return seed(s);
         }
 
-        void seed(long long s)
+        long long seed(long long s)
         {
             gen = std::default_random_engine(s);
+            return s;
         }
 
         State state()
